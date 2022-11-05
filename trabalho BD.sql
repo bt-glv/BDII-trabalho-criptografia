@@ -1,3 +1,33 @@
+-- setup START
+
+set serveroutput on;
+
+create table login
+(
+	cod_login number constraint pk primary key
+	,login varchar2(30)
+	,senha varchar2(150)
+);
+
+create table acesso
+(
+	data_hora timestamp, 
+	cod_login number constraint fk references login(cod_login)
+);
+
+insert into login values (1, 'Adalberto',	'123456789');
+insert into login values (2, 'Fredegunda',	'123456789');
+insert into login values (3, 'Brigda', 		'123456789');
+insert into login values (4, 'Filho de Belial', '123456789');
+
+select * from login;
+
+-- setup tables END
+
+
+
+
+
 create or replace function fn_criptografia(senha varchar2, acrescimo number)
 return varchar2
 as
@@ -158,5 +188,69 @@ end;
 -- Test area START
 	select fn_descriptografia('070072074054082080052087076053',3) from dual;
 -- Test area START
+
+
+	
+
+call pr_insere_login(1, 'Adalberto', 'asdf');
+create or replace procedure pr_insere_login(in_cod_login number, in_login varchar2, senha varchar2)
+is
+
+	cursor check_login is
+	select cod_login, login
+	from login;
+
+	check_login_count number;
+
+	now_timestamp timestamp;
+	after_encryption varchar(300);
+
+begin
+
+	for xxx in check_login loop
+			
+		select count(cod_login) into check_login_count from login where cod_login = xxx.cod_login;
+		if check_login_count > 0 then 
+			dbms_output.put_line('[Fail]     -> cod_login repetido');
+			raise_application_error(-20001, 'Exitem campos login ou cod_login repetidos');
+		end if;
+
+		select count(cod_login) into check_login_count from login where lower(login) = lower(xxx.login);
+		if check_login_count > 0 then 
+			dbms_output.put_line('[Fail]     -> Login repetido');
+			raise_application_error(-20001, 'Exitem campos login ou cod_login repetidos');
+		end if;
+
+	end loop;
+
+	dbms_output.put_line('[Success] -> Sem campos criticos repetidos');
+
+	now_timestamp:=to_char(systimestamp,'FF1');
+	select fn_criptografia(senha, now_timestamp) into after_encryption from dual;
+
+	insert into login values (in_cod_login, in_login, after_encryption);
+	insert into acesso values (now_timestamp, in_cod_login);
+
+end;
+/
+
+
+
+
+
+
+call pr_valida_login('sample text', 'sample text');
+create or replace procedure pr_valida_login(login varchar2, senha varchar2)
+is
+
+
+
+begin
+
+
+
+end;
+/
+
 
 
