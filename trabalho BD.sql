@@ -1,4 +1,4 @@
--- setup START
+-- setup and test code START
 
 set serveroutput on;
 
@@ -119,12 +119,9 @@ end;
 --	Questao 03
 --
 
-
 -- Test area START
 	select fn_descriptografia('070072074054082080052087076053',3) from dual;
 -- Test area START
-
-
 
 create or replace function fn_descriptografia(senha varchar2, acrescimo number)
 return varchar2
@@ -213,15 +210,11 @@ end;
 --	Questao 4	
 --	
 
-
-
 --	Test area START
 select * from login;
 select * from acesso;
 call pr_insere_login(1, 'Adalberto', 'asdf');
 --	Test area END
-
-
 
 create or replace procedure pr_insere_login(in_cod_login number, in_login varchar2, senha varchar2)
 is
@@ -240,13 +233,13 @@ begin
 
 	select count(cod_login) into check_login_count from login where cod_login = in_cod_login;
 	if check_login_count >= 1 then
-		raise_application_error(-20001, 'Exitem campos cod_login repetidos');
+		raise_application_error(-20001, 'O campo cod_login informado esta repetido na tabela.');
 	end if;
 
 
 	select count(cod_login) into check_login_count from login where login = in_login;
 	if check_login_count >= 1 then
-		raise_application_error(-20001, 'Exitem campos login repetidos');
+		raise_application_error(-20001, 'O campo login informado esta repetido na tabela.');
 	end if;
 
 
@@ -267,16 +260,42 @@ end;
 
 
 
+--
+--	Questao 5
+--
 
 
+--	Test area START
+call pr_valida_login('Adalberto', 'asdf');
+--	Test area END
 
-call pr_valida_login('sample text', 'sample text');
-create or replace procedure pr_valida_login(login varchar2, senha varchar2)
+create or replace procedure pr_valida_login(in_login varchar2, in_senha varchar2)
 is
 
+	login_existance_check varchar2(300);
+	login_cod number;
 
+	acrescimo timestamp;
 
 begin
+	
+	begin
+		select l.login into login_existance_check from login l where lower(l.login) = lower(in_login);
+	exception when NO_DATA_FOUND then
+		raise_application_error(-20002, 'O login informado nao existe');
+	end;
+
+	select cod_login into login_cod from login l where l.cod_login = in_login;
+
+	select data_hora from acesso where cod_login = login_cod and data_hora = (
+		select data_hora from acesso l where cod_login = in_login group by cod_login having max(to_number(to_char(data_hora, 'FF1'))) = to_number(to_char(data_hora, 'FF1'))
+		
+		select max(data_hora) from acesso l where cod_login = in_login
+
+		select * from acesso order by updated_data desc fetch first 1 rows only;
+	)
+	-- select the most recent timestamp with the login_code
+
 
 
 
