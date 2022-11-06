@@ -249,11 +249,12 @@ begin
 	now_timestamp_true:=systimestamp;
 	now_timestamp:=to_number(to_char(now_timestamp_true,'FF1'));
 
-	select fn_criptografia(senha, to_number(now_timestamp)) into after_encryption from dual;
+	select fn_criptografia(senha, now_timestamp) into after_encryption from dual;
 	-- after_encryption:=fn_criptografia(senha, to_number(now_timestamp));
 
 	insert into login values (in_cod_login, in_login, after_encryption);
 	insert into acesso values (now_timestamp_true, in_cod_login);
+	dbms_output.put_line('[Success] -> Campos inseridos em login e acesso');
 
 end;
 /
@@ -266,7 +267,11 @@ end;
 
 
 --	Test area START
-call pr_valida_login('Adalberto', 'asdf');
+call pr_valida_login('DAdalberto', 'asdf');
+
+set serveroutput on;
+select * from login;
+select * from acesso;
 --	Test area END
 
 create or replace procedure pr_valida_login(in_login varchar2, in_senha varchar2)
@@ -276,28 +281,55 @@ is
 	login_cod number;
 
 	acrescimo timestamp;
+	acrescimo_number number;
 
+	decryption_result varchar2(300);
+	
+	current_password varchar2(300);
+	current_password_after_decrypt varchar2(300);
 begin
 	
 	begin
-		select l.login into login_existance_check from login l where lower(l.login) = lower(in_login);
+		select l.cod_login into login_cod from login l where lower(l.login) = lower(in_login);
 	exception when NO_DATA_FOUND then
 		raise_application_error(-20002, 'O login informado nao existe');
 	end;
 
-	select cod_login into login_cod from login l where l.cod_login = in_login;
 
-	select data_hora from acesso where cod_login = login_cod and data_hora = (
-		select data_hora from acesso l where cod_login = in_login group by cod_login having max(to_number(to_char(data_hora, 'FF1'))) = to_number(to_char(data_hora, 'FF1'))
-		
-		select max(data_hora) from acesso l where cod_login = in_login
-
-		select * from acesso order by updated_data desc fetch first 1 rows only;
+	SELECT data_hora into acrescimo
+	FROM 
+	(
+     	SELECT i.*,
+     	ROW_NUMBER() OVER
+		(
+			ORDER BY data_hora DESC
+		) AS rn
+     	FROM acesso i
+	where cod_login = login_cod
 	)
-	-- select the most recent timestamp with the login_code
+	WHERE rn = 1;
 
 
 
+	acrescimo_number:=to_number(to_char(acrescimo, 'FF1'));
+	dbms_output.put_line('Acrescimo valor ->'||acrescimo_number);
+
+
+	/*
+	decryption_result:=fn_descriptografia(in_senha, acrescimo_number);
+	-- select fn_descriptografia(in_senha, acrescimo_number) into decryption_result from dual;
+	dbms_output.put_line('After descriptografia I');
+
+
+	select senha into current_password from login where cod_login = login_cod;
+	select fn_descriptografia(current_password, acrescimo_number) into current_password_after_decrypt from dual;
+	dbms_output.put_line('After descriptografia II');
+
+	if current_password = decryption_result then
+		dbms_output.put_line('O login inserido foi validado com sucesso!');
+	end if;
+	dbms_output.put_line('After comparison');
+	*/
 
 end;
 /
