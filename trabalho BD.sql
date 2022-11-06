@@ -22,11 +22,21 @@ insert into login values (4, 'Filho de Belial', '123456789');
 
 select * from login;
 
--- setup tables END
+-- setup END
 
 
 
 
+
+
+
+--
+--	Questao 1 - 2
+--
+
+-- Test area START
+select fn_criptografia('COTEMIG123',3) from dual;
+-- Test area END
 
 create or replace function fn_criptografia(senha varchar2, acrescimo number)
 return varchar2
@@ -101,10 +111,18 @@ begin
 	return after_acsii;
 end;
 /
--- Test area START
-select fn_criptografia('COTEMIG123',3) from dual;
--- Test area END
 
+
+
+
+--
+--	Questao 03
+--
+
+
+-- Test area START
+	select fn_descriptografia('070072074054082080052087076053',3) from dual;
+-- Test area START
 
 
 
@@ -185,14 +203,26 @@ begin
 end;
 /
 
--- Test area START
-	select fn_descriptografia('070072074054082080052087076053',3) from dual;
--- Test area START
 
 
-	
 
+
+
+
+--	
+--	Questao 4	
+--	
+
+
+
+--	Test area START
+select * from login;
+select * from acesso;
 call pr_insere_login(1, 'Adalberto', 'asdf');
+--	Test area END
+
+
+
 create or replace procedure pr_insere_login(in_cod_login number, in_login varchar2, senha varchar2)
 is
 
@@ -202,34 +232,35 @@ is
 
 	check_login_count number;
 
-	now_timestamp timestamp;
+	now_timestamp number;
+	now_timestamp_true timestamp;
 	after_encryption varchar(300);
 
 begin
 
-	for xxx in check_login loop
-			
-		select count(cod_login) into check_login_count from login where cod_login = xxx.cod_login;
-		if check_login_count > 0 then 
-			dbms_output.put_line('[Fail]     -> cod_login repetido');
-			raise_application_error(-20001, 'Exitem campos login ou cod_login repetidos');
-		end if;
+	select count(cod_login) into check_login_count from login where cod_login = in_cod_login;
+	if check_login_count >= 1 then
+		raise_application_error(-20001, 'Exitem campos cod_login repetidos');
+	end if;
 
-		select count(cod_login) into check_login_count from login where lower(login) = lower(xxx.login);
-		if check_login_count > 0 then 
-			dbms_output.put_line('[Fail]     -> Login repetido');
-			raise_application_error(-20001, 'Exitem campos login ou cod_login repetidos');
-		end if;
 
-	end loop;
+	select count(cod_login) into check_login_count from login where login = in_login;
+	if check_login_count >= 1 then
+		raise_application_error(-20001, 'Exitem campos login repetidos');
+	end if;
+
+
 
 	dbms_output.put_line('[Success] -> Sem campos criticos repetidos');
 
-	now_timestamp:=to_char(systimestamp,'FF1');
-	select fn_criptografia(senha, now_timestamp) into after_encryption from dual;
+	now_timestamp_true:=systimestamp;
+	now_timestamp:=to_number(to_char(now_timestamp_true,'FF1'));
+
+	select fn_criptografia(senha, to_number(now_timestamp)) into after_encryption from dual;
+	-- after_encryption:=fn_criptografia(senha, to_number(now_timestamp));
 
 	insert into login values (in_cod_login, in_login, after_encryption);
-	insert into acesso values (now_timestamp, in_cod_login);
+	insert into acesso values (now_timestamp_true, in_cod_login);
 
 end;
 /
