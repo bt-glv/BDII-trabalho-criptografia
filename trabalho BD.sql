@@ -243,18 +243,16 @@ begin
 	end if;
 
 
-
-	dbms_output.put_line('[Success] -> Sem campos criticos repetidos');
-
 	now_timestamp_true:=systimestamp;
 	now_timestamp:=to_number(to_char(now_timestamp_true,'FF1'));
+
 
 	select fn_criptografia(senha, now_timestamp) into after_encryption from dual;
 	-- after_encryption:=fn_criptografia(senha, to_number(now_timestamp));
 
+
 	insert into login values (in_cod_login, in_login, after_encryption);
 	insert into acesso values (now_timestamp_true, in_cod_login);
-	dbms_output.put_line('[Success] -> Campos inseridos em login e acesso');
 
 end;
 /
@@ -283,10 +281,9 @@ is
 	acrescimo timestamp;
 	acrescimo_number number;
 
-	decryption_result varchar2(300);
-	
+	encryption_result varchar2(300);
 	current_password varchar2(300);
-	current_password_after_decrypt varchar2(300);
+
 begin
 	
 	begin
@@ -310,27 +307,19 @@ begin
 	WHERE rn = 1;
 
 
-
 	acrescimo_number:=to_number(to_char(acrescimo, 'FF1'));
-	dbms_output.put_line('Acrescimo valor ->'||acrescimo_number);
 
-
-	/*
-	decryption_result:=fn_descriptografia(in_senha, acrescimo_number);
-	-- select fn_descriptografia(in_senha, acrescimo_number) into decryption_result from dual;
-	dbms_output.put_line('After descriptografia I');
+	encryption_result:=fn_criptografia(in_senha, acrescimo_number);
+	-- select fn_descriptografia(in_senha, acrescimo_number) into encryption_result from dual;
 
 
 	select senha into current_password from login where cod_login = login_cod;
-	select fn_descriptografia(current_password, acrescimo_number) into current_password_after_decrypt from dual;
-	dbms_output.put_line('After descriptografia II');
 
-	if current_password = decryption_result then
+	if current_password = encryption_result then
 		dbms_output.put_line('O login inserido foi validado com sucesso!');
+	else
+		dbms_output.put_line('Login invalido');
 	end if;
-	dbms_output.put_line('After comparison');
-	*/
-
 end;
 /
 
