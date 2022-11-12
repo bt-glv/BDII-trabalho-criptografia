@@ -5,11 +5,7 @@
 
 
 
-
-
-
-	-- setup and test code START
-
+	-- setup and test code INICIO
 set serveroutput on;
 
 create table login
@@ -24,12 +20,7 @@ create table acesso
 	data_hora timestamp, 
 	cod_login number constraint fk references login(cod_login)
 );
-
-	-- setup END
-
-
-
-
+	-- setup FIM
 
 
 
@@ -37,9 +28,9 @@ create table acesso
 --	Questao 1 - 2
 --
 
--- Test area START
+-- Area de teste INICIO
 select fn_criptografia('COTEMIG123',3) from dual;
--- Test area END
+-- Area de teste FIM
 
 create or replace function fn_criptografia(senha varchar2, acrescimo number)
 return varchar2
@@ -61,7 +52,7 @@ begin
     end if;
 
 
-    -- Encrypt loop START
+    -- Encrypt loop INICIO
     loop_3_nu:=1;
     for loop_2 in 0 .. 2 loop
 
@@ -81,9 +72,9 @@ begin
         end loop;
 
     end loop;
--- Encrypt loop END
+-- Encrypt loop FIM
 
--- To ascii START
+-- To ascii INICIO
 	for loop_4 in 0..lean-1 loop
 
 		loop_4_str:=substr(after_scramble, loop_4+1, 1);
@@ -102,7 +93,7 @@ begin
 		after_acsii:=after_acsii||loop_4_str;
 
 	end loop;
--- To ascii END
+-- To ascii FIM
 
 
 
@@ -112,14 +103,13 @@ end;
 
 
 
-
 --
 --	Questao 03
 --
 
--- Test area START
+-- Area de teste INICIO
 	select fn_descriptografia('070072074054082080052087076053',3) from dual;
--- Test area START
+-- Area de teste INICIO
 
 create or replace function fn_descriptografia(senha varchar2, acrescimo number)
 return varchar2
@@ -140,13 +130,9 @@ as
 
 
 begin 
-	-- ascii decript START
+	-- ascii decript INICIO
 	loop_1_nu:=1;
 	for loop_1 in 0..lean loop
-
-		-- if loop_1_nu >= lean then
-			-- exit;
-		-- end if;
 
 		if loop_1_nu+3 > lean+1 then
 			exit;
@@ -154,11 +140,12 @@ begin
 
 		after_acsii:=after_acsii||chr(to_number(substr(senha,loop_1_nu,3))-acrescimo);
 		loop_1_nu:=loop_1_nu+3;
+
 	end loop;
-	-- ascii decript END
+	-- ascii decript FIM
 
 
-	-- Decrypt loop START
+	-- Decrypt loop INICIO
 		
 		lean:=length(after_acsii);
 		extra:=mod(lean,3);
@@ -191,7 +178,7 @@ begin
 
 		after_scramble:=after_scramble||extra_elements;
 
-	-- Decrypt loop END
+	-- Decrypt loop FIM
 
 
 	return after_scramble;
@@ -200,19 +187,17 @@ end;
 
 
 
-
-
-
-
 --	
 --	Questao 4	
 --	
 
---	Test area START
+--	Area de teste INICIO
 select * from login;
 select * from acesso;
 call pr_insere_login(1, 'Adalberto', 'asdf');
---	Test area END
+
+set serveroutput on;
+--	Area de teste FIM
 
 create or replace procedure pr_insere_login(in_cod_login number, in_login varchar2, senha varchar2)
 is
@@ -235,7 +220,7 @@ begin
 	end if;
 
 
-	select count(cod_login) into check_login_count from login where login = in_login;
+	select count(cod_login) into check_login_count from login where lower(login) = lower(in_login);
 	if check_login_count >= 1 then
 		raise_application_error(-20001, 'O campo login informado esta repetido na tabela.');
 	end if;
@@ -251,6 +236,7 @@ begin
 	insert into login values (in_cod_login, in_login, after_encryption);
 	insert into acesso values (now_timestamp_true, in_cod_login);
 
+	dbms_output.put_line('O login foi inserido com sucesso!');
 end;
 /
 
@@ -261,13 +247,13 @@ end;
 --
 
 
---	Test area START
+--	Area de teste INICIO
 call pr_valida_login('DAdalberto', 'asdf');
 
 set serveroutput on;
 select * from login;
 select * from acesso;
---	Test area END
+--	Area de teste FIM
 
 create or replace procedure pr_valida_login(in_login varchar2, in_senha varchar2)
 is
@@ -319,7 +305,6 @@ begin
 		new_acrescimo_number:=to_number(to_char(new_acrescimo, 'FF1'));
 		new_password:=fn_criptografia(fn_descriptografia(current_password, acrescimo_number), new_acrescimo_number);
 
-		-- dbms_output.put_line(acrescimo||'    '||new_acrescimo);
 
 		insert into acesso values (new_acrescimo, login_cod);
 		update login set senha = new_password where cod_login = login_cod;
