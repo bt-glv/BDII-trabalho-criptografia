@@ -1,4 +1,14 @@
--- setup and test code START
+/*
+	BDII
+	BRNUO TELES GALVAO - 72200332 
+*/
+
+
+
+
+
+
+	-- setup and test code START
 
 set serveroutput on;
 
@@ -15,14 +25,7 @@ create table acesso
 	cod_login number constraint fk references login(cod_login)
 );
 
-insert into login values (1, 'Adalberto',	'123456789');
-insert into login values (2, 'Fredegunda',	'123456789');
-insert into login values (3, 'Brigda', 		'123456789');
-insert into login values (4, 'Filho de Belial', '123456789');
-
-select * from login;
-
--- setup END
+	-- setup END
 
 
 
@@ -41,18 +44,14 @@ select fn_criptografia('COTEMIG123',3) from dual;
 create or replace function fn_criptografia(senha varchar2, acrescimo number)
 return varchar2
 as
-	-- cast dbms_sql.varchar2_table;
-
 	lean number;
 
 	loop_3 boolean;
 	loop_3_nu number;
 	after_scramble varchar2(300):='';
-	-- Caso deseje ver o resultado do embaralhamento da senha, mude o retorno para essa variavel.
 
 	loop_4_str varchar2(300);
 	after_acsii varchar2(300):='';
-	--Caso queira ver o estado final da senha, mude o retorno para essa variavel.
 
 begin
 
@@ -74,7 +73,6 @@ begin
             then
                 loop_3:=false;
             else
-                --after_scramble:=after_scramble||cast(loop_3_nu);
                 after_scramble:=after_scramble||substr(senha, loop_3_nu+1,1);
                 loop_3_nu:=loop_3_nu+3;
             end if;
@@ -248,7 +246,6 @@ begin
 
 
 	select fn_criptografia(senha, now_timestamp) into after_encryption from dual;
-	-- after_encryption:=fn_criptografia(senha, to_number(now_timestamp));
 
 
 	insert into login values (in_cod_login, in_login, after_encryption);
@@ -284,6 +281,10 @@ is
 	encryption_result varchar2(300);
 	current_password varchar2(300);
 
+	new_acrescimo timestamp;
+	new_acrescimo_number number;
+	new_password varchar2(300);
+
 begin
 	
 	begin
@@ -297,10 +298,7 @@ begin
 	FROM 
 	(
      	SELECT i.*,
-     	ROW_NUMBER() OVER
-		(
-			ORDER BY data_hora DESC
-		) AS rn
+     	ROW_NUMBER() OVER (ORDER BY data_hora DESC) AS rn
      	FROM acesso i
 	where cod_login = login_cod
 	)
@@ -308,20 +306,27 @@ begin
 
 
 	acrescimo_number:=to_number(to_char(acrescimo, 'FF1'));
-
 	encryption_result:=fn_criptografia(in_senha, acrescimo_number);
-	-- select fn_descriptografia(in_senha, acrescimo_number) into encryption_result from dual;
-
-
 	select senha into current_password from login where cod_login = login_cod;
 
+
 	if current_password = encryption_result then
+
+
 		dbms_output.put_line('O login inserido foi validado com sucesso!');
+
+		new_acrescimo:=systimestamp;	
+		new_acrescimo_number:=to_number(to_char(new_acrescimo, 'FF1'));
+		new_password:=fn_criptografia(fn_descriptografia(current_password, acrescimo_number), new_acrescimo_number);
+
+		dbms_output.put_line(acrescimo||'    '||new_acrescimo);
+
+		insert into acesso values (new_acrescimo, login_cod);
+		update login set senha = new_password where cod_login = login_cod;
+
+
 	else
 		dbms_output.put_line('Login invalido');
 	end if;
 end;
 /
-
-
-
