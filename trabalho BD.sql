@@ -319,7 +319,7 @@ begin
 		new_acrescimo_number:=to_number(to_char(new_acrescimo, 'FF1'));
 		new_password:=fn_criptografia(fn_descriptografia(current_password, acrescimo_number), new_acrescimo_number);
 
-		dbms_output.put_line(acrescimo||'    '||new_acrescimo);
+		-- dbms_output.put_line(acrescimo||'    '||new_acrescimo);
 
 		insert into acesso values (new_acrescimo, login_cod);
 		update login set senha = new_password where cod_login = login_cod;
