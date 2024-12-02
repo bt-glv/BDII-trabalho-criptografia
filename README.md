@@ -63,16 +63,10 @@ CEG3OM1TI2
 `CEG3OM1TI2 -> 070072074054082080052087076053`
 > OBS: Perceba que todos os números tem 3 posições.
 
-5.  Deverá ser acrescido em cada número gerado o valor passado no parâmetro ACRESCIMO
-Supondo que o valor de ACRESCIMO seja 3, teríamos:
-`067069071051079077049084073050`
-
-
-
-6. Deve-se acrescentar a cada número gerado o valor passado no parâmetro `ACRESCIMO`.
+5. Deve-se acrescentar a cada número gerado o valor passado no parâmetro `ACRESCIMO`.
    - Exemplo: Supondo que o valor de `ACRESCIMO` seja **3**, o resultado seria:
      ```
-     [números resultantes]
+     [067069071051079077049084073050]
      ```
 
 Esse número será registrado no campo **SENHA** da tabela **LOGIN** para o usuário em questão.
