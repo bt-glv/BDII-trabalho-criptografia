@@ -4,21 +4,21 @@
 > Trabalho de PL/SQL
 
 # Regras para o Trabalho de PL/SQL
-
+</br>
 ## 1. Formação do Grupo
 - O trabalho será realizado em grupo de até **3 alunos**.
   - **OBS**: Para cada aluno a mais na formação do grupo corresponderá a **-30% da nota**.
-
+</br>
 ## 2. Valor do Trabalho
 - O valor do trabalho é de **30 pontos**.
-
+</br>
 ## 3. Data de Entrega
 - A data de entrega de **TODOS os grupos** será no dia **17/11/2022**.
   - **OBS**: Para cada dia corrido de atraso na entrega do trabalho será descontado **50% da nota**.
-
+</br>
 ## 4. Forma de Entrega
 - O trabalho deverá ser entregue via **CLASSROOM**.
-
+</br>
 ## 5. Descrição do Trabalho
 O trabalho consiste em criar rotinas que serão responsáveis por criptografar e descriptografar os valores armazenados no campo **SENHA** da tabela **LOGIN**.
 
